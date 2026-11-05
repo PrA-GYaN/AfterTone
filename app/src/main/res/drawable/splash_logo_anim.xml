@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The wave draws in, holds, and rings out (its start runs after its end). MainActivity restarts it
+     while the splash is up. -->
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android" android:drawable="@drawable/splash_logo">
+    <target android:name="wave" android:animation="@animator/wave_ring" />
+</animated-vector>

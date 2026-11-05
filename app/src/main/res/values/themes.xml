@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.SpotifyWrapper" parent="android:Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@color/wrap_bg</item>
+        <item name="android:statusBarColor">@color/wrap_bg</item>
+        <item name="android:navigationBarColor">@color/wrap_bg</item>
+    </style>
+</resources>

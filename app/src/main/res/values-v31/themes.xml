@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ draws its own launch splash first: keep it dark and empty, so it blends into the
+         app's animated splash instead of flashing a light screen with the small launcher icon. -->
+    <style name="Theme.SpotifyWrapper" parent="android:Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@color/wrap_bg</item>
+        <item name="android:statusBarColor">@color/wrap_bg</item>
+        <item name="android:navigationBarColor">@color/wrap_bg</item>
+        <item name="android:windowSplashScreenBackground">@color/wrap_bg</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_blank</item>
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
+    </style>
+</resources>

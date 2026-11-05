@@ -1,0 +1,47 @@
+{
+  "manifest_version": 2,
+  "name": "Spotify mobile layout",
+  "version": "1.1",
+  "description": "Built into the app: restyles open.spotify.com for a phone (same code as the userscript), blocks Spotify's video-ad servers and tells the app about ads and playback errors.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "wrap@spotifywrapper"
+    }
+  },
+  "permissions": [
+    "nativeMessaging",
+    "nativeMessagingFromContent",
+    "geckoViewAddons",
+    "webRequest",
+    "webRequestBlocking",
+    "*://*.scdn.co/*",
+    "*://*.spotifycdn.com/*",
+    "*://*.2mdn.net/*",
+    "*://www.google-analytics.com/*",
+    "*://analytics.google.com/*",
+    "*://stats.g.doubleclick.net/*",
+    "*://www.googletagmanager.com/*",
+    "*://sb.scorecardresearch.com/*",
+    "*://o22381.ingest.sentry.io/*",
+    "*://www.fastly-insights.com/*",
+    "*://*.spotify.com/*"
+  ],
+  "background": {
+    "scripts": [
+      "block.js"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://open.spotify.com/*"
+      ],
+      "js": [
+        "load-css.js",
+        "inject.js",
+        "app.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

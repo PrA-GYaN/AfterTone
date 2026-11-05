@@ -1,0 +1,423 @@
+/* Your design. Injected into every open.spotify.com page, last in <head>.
+ *
+ * Phone layout: inject.js marks Spotify's layout parts with data-wrap="..." (grid, left, main,
+ * right, player, np-row, np-track, np-controls, np-extra) and sets classes on <html>:
+ *   wrap-mobile   phone layout is on (LAYOUT = 'mobile' in inject.js)
+ *   wrap-library  the Library sheet is open
+ *   wrap-panel    Spotify's Now Playing / queue panel is open
+ *   wrap-typing   a text field has the keyboard
+ * Everything here hangs off those, so with LAYOUT = 'desktop' only the first block applies.
+ * Spotify's own class names are generated and change: use ids, data-testid and the marks above. */
+
+:root {
+  --wrap-accent: #1ed760;   /* Spotify-style green */
+  --wrap-bg: #121212;
+  --wrap-nav-h: 60px;
+}
+
+/* ---- Everywhere: feels like an app, not a web page ---- */
+
+html, body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+* {
+  scrollbar-width: none;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+a, button, [role="button"], [role="tab"], [role="row"] {
+  touch-action: manipulation;
+}
+
+/* ---- Phone layout: one column ---- */
+
+html.wrap-mobile body {
+  min-width: 0 !important;    /* Spotify sets 800px */
+  min-height: 0 !important;   /* and 600px, which pushed the player off a landscape phone */
+}
+/* Nothing may make the page wider than the screen: in desktop-site mode the browser zooms the
+ * whole page out to fit anything wider (Spotify briefly adds wide elements when playback starts),
+ * which shrank the page into a corner. Spotify's page scrolls inside its own panels, never the
+ * document itself. */
+html.wrap-mobile,
+html.wrap-mobile body {
+  overflow: hidden !important;
+  max-width: 100% !important;
+}
+html.wrap-mobile [data-wrap="grid"] {
+  grid-template-columns: 0 minmax(0, 1fr) 0 !important;
+  /* top-banner, global-nav, main-view, now-playing-bar */
+  grid-template-rows: auto 56px minmax(0, 1fr) auto !important;
+  column-gap: 0 !important;
+  row-gap: 0 !important;
+  padding: 0 0 var(--wrap-nav-h) !important;
+  box-sizing: border-box;
+}
+html.wrap-mobile.wrap-typing [data-wrap="grid"] {
+  padding-bottom: 0 !important;
+}
+html.wrap-mobile [data-wrap="left"],
+html.wrap-mobile [data-wrap="right"] {
+  display: none !important;
+}
+html.wrap-mobile [data-wrap="main"] {
+  border-radius: 0 !important;
+}
+/* Spotify pulls the top bar, player and overlay layers 8px past the grid padding removed above. */
+html.wrap-mobile [data-wrap="grid"] > * {
+  margin: 0 !important;
+}
+html.wrap-mobile #global-nav-bar,
+html.wrap-mobile [data-wrap="player"] {
+  width: auto !important;
+}
+/* Footers (legal links, language, "Install app" banner) are not wanted in an app. */
+html.wrap-mobile [data-testid="footer-div"],
+html.wrap-mobile [data-testid="left-sidebar-footer"] {
+  display: none !important;
+}
+/* The drag handle that resizes the sidebar is no use on a phone. */
+html.wrap-mobile [data-testid="LayoutResizer__resize-bar"] {
+  display: none !important;
+}
+
+/* Library sheet: the sidebar takes the main column. */
+html.wrap-mobile.wrap-library [data-wrap="grid"] {
+  grid-template-columns: minmax(0, 1fr) 0 0 !important;
+}
+html.wrap-mobile.wrap-library [data-wrap="left"] {
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+/* The left area (logged in it has no id) and everything Spotify nests in it at sidebar width. */
+html.wrap-mobile.wrap-library [data-wrap="left"] > *,
+html.wrap-mobile.wrap-library [data-wrap="left"] nav {
+  width: 100% !important;
+  max-width: none !important;
+}
+html.wrap-mobile.wrap-library [data-wrap="main"] {
+  display: none !important;
+}
+
+/* Lyrics sheet: Spotify shows lyrics in the left area at phone width; it takes the main column. */
+html.wrap-mobile.wrap-lyrics [data-wrap="grid"] {
+  grid-template-columns: minmax(0, 1fr) 0 0 !important;
+}
+html.wrap-mobile.wrap-lyrics [data-wrap="left"] {
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+html.wrap-mobile.wrap-lyrics [data-wrap="left"] > *,
+html.wrap-mobile.wrap-lyrics [data-wrap="left"] div:has([data-testid="lyrics-line"]) {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+html.wrap-mobile.wrap-lyrics [data-wrap="main"] {
+  display: none !important;
+}
+/* The left area holds the lyrics view and the Library list side by side: lyrics alone, full width. */
+html.wrap-mobile.wrap-lyrics [data-wrap="left"] > :not(:has([data-testid="lyrics-line"])) {
+  display: none !important;
+}
+html.wrap-mobile.wrap-lyrics [data-wrap="left"] > :has([data-testid="lyrics-line"]) {
+  flex: 1 1 100% !important;
+}
+/* Side margins for the lines (Spotify's desktop margin comes from a column we removed). */
+html.wrap-mobile.wrap-lyrics [data-wrap="left"] div:has(> [data-testid="lyrics-line"]) {
+  padding: 0 20px !important;
+  box-sizing: border-box !important;
+}
+
+/* Now Playing / queue / devices panel: takes the main column while open. */
+html.wrap-mobile.wrap-panel:not(.wrap-library) [data-wrap="grid"] {
+  grid-template-columns: 0 0 minmax(0, 1fr) !important;
+}
+html.wrap-mobile.wrap-panel:not(.wrap-library) [data-wrap="right"] {
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+/* Spotify nests the panel in fixed 280px desktop columns (one of them absolutely placed): every
+ * container around it takes the full width and height instead. */
+html.wrap-mobile.wrap-panel:not(.wrap-library) [data-wrap="right"] div:has(#Desktop_PanelContainer_Id),
+html.wrap-mobile.wrap-panel:not(.wrap-library) #Desktop_PanelContainer_Id {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+/* The collapsed-panel strip and its resize handle are desktop leftovers. */
+html.wrap-mobile.wrap-panel [data-wrap="right"] button[aria-label^="Show Now Playing"],
+html.wrap-mobile.wrap-panel [data-wrap="right"] [data-testid="LayoutResizer__resize-bar"] {
+  display: none !important;
+}
+html.wrap-mobile.wrap-panel:not(.wrap-library) [data-wrap="main"] {
+  display: none !important;
+}
+
+/* ---- Top bar: search and your account, the rest is in the tab bar ---- */
+
+html.wrap-mobile #global-nav-bar {
+  height: 56px !important;
+  align-items: center !important;
+  padding: 0 8px !important;
+  gap: 8px;
+}
+html.wrap-mobile #global-nav-bar > div:has(> a svg[aria-label="Spotify"]),
+html.wrap-mobile #global-nav-bar [data-testid="home-button"] {
+  display: none !important;
+}
+/* The search box gives way; your account buttons keep their size. */
+html.wrap-mobile #global-nav-bar > div:has([data-testid="home-button"]) {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+html.wrap-mobile #global-nav-bar > div:last-child,
+html.wrap-mobile #global-nav-bar > div:last-child > div {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+}
+html.wrap-mobile #global-nav-bar > div:last-child button {
+  white-space: nowrap !important;
+}
+html.wrap-mobile #global-nav-bar form,
+html.wrap-mobile #global-nav-bar > div:has([data-testid="home-button"]) > div,
+html.wrap-mobile #global-nav-bar > div:has([data-testid="home-button"]) > div > div {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+/* Wide-window text links and dividers marked by inject.js (Premium, Support, Download). */
+html.wrap-mobile [data-wrap="hide"] {
+  display: none !important;
+}
+/* Text links like "Install App" / "Explore Premium" become icon-only. */
+html.wrap-mobile #global-nav-bar a .ellipsis-one-line {
+  display: none !important;
+}
+
+/* ---- Player: a mini player above the tab bar ---- */
+
+html.wrap-mobile [data-testid="now-playing-bar"] {
+  min-width: 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+/* The player as one floating card above the tab bar, as in Spotify's phone app. */
+html.wrap-mobile [data-wrap="np-row"] {
+  margin: 6px 8px 6px !important;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #242424, #1b1b1b) !important;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+/* The progress bar in the app's accent while it plays. */
+html.wrap-mobile [data-testid="playback-progressbar"] {
+  --fg-color: var(--wrap-accent);
+}
+html.wrap-mobile [data-wrap="np-row"] {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "track extra" "controls controls";
+  align-items: center;
+  gap: 2px 8px;
+  height: auto !important;
+  padding: 8px 12px 6px !important;
+  box-sizing: border-box;
+}
+html.wrap-mobile [data-wrap="np-track"] {
+  grid-area: track;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+html.wrap-mobile [data-wrap="np-extra"] {
+  grid-area: extra;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+html.wrap-mobile [data-wrap="np-extra"] > div {
+  gap: 4px;
+}
+html.wrap-mobile [data-wrap="np-controls"] {
+  grid-area: controls;
+  width: 100% !important;
+  max-width: none !important;
+}
+/* The phone's volume keys do this better than a tiny slider. */
+html.wrap-mobile [data-wrap="np-extra"] [data-testid="volume-bar"] {
+  display: none !important;
+}
+/* Bigger, easier controls. */
+html.wrap-mobile [data-testid="player-controls"] {
+  width: 100% !important;
+}
+html.wrap-mobile [data-testid="general-controls"] {
+  justify-content: space-evenly !important;
+  width: 100% !important;
+}
+html.wrap-mobile [data-testid="general-controls"] > div {
+  flex: 1 1 0 !important;
+  justify-content: space-evenly !important;
+  width: auto !important;
+}
+html.wrap-mobile [data-testid="general-controls"] button {
+  min-width: 44px;
+  min-height: 44px;
+}
+html.wrap-mobile [data-testid="control-button-playpause"] {
+  transform: scale(1.25);
+}
+/* ---- Tab bar (this app's own element, built by inject.js) ---- */
+
+#__wrap_nav {
+  display: none;
+}
+html.wrap-mobile #__wrap_nav {
+  display: flex;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--wrap-nav-h);
+  z-index: 2147483000;
+  background: linear-gradient(to top, #000 40%, rgba(0, 0, 0, 0.92));
+}
+html.wrap-mobile.wrap-typing #__wrap_nav {
+  display: none;
+}
+#__wrap_nav button {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #a7a7a7;
+  font: 500 11px/1.2 system-ui, sans-serif;
+  cursor: pointer;
+}
+#__wrap_nav button svg {
+  width: 26px;
+  height: 26px;
+  fill: currentColor;
+}
+#__wrap_nav button.active {
+  color: #fff;
+}
+#__wrap_nav button:active svg {
+  transform: scale(0.92);
+}
+
+/* ---- Touch: no desktop hover leftovers ---- */
+
+/* A tap is also a mouse hover to the browser, so Spotify's hover tooltips ("Enable shuffle",
+ * "Next", ...) popped up over the layout on every tap. Tooltips hold only text; Spotify's menus
+ * use the same pop-up machinery but contain menu items, so those stay. */
+html.wrap-mobile [role="tooltip"]:not(:has(button, a, input, [role="menu"], [role="menuitem"], [role="dialog"])),
+html.wrap-mobile .legacy-tooltip {
+  display: none !important;
+}
+/* No accidental text selection (and its Copy / Share bar) from long-pressing buttons and rows;
+ * text fields still select. */
+html.wrap-mobile body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+html.wrap-mobile input,
+html.wrap-mobile textarea,
+html.wrap-mobile [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ---- Artist banner: the whole picture, not a blown-up middle ---- */
+
+html.wrap-mobile [data-testid="background-image"] {
+  background-size: 100% auto !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+  /* Fade the bottom of the picture into the page; --wrap-banner-ratio (height / width) is set by
+   * inject.js once the picture is measured. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100vw * var(--wrap-banner-ratio, 0.42) * 0.6), transparent calc(100vw * var(--wrap-banner-ratio, 0.42)));
+  mask-image: linear-gradient(to bottom, #000 calc(100vw * var(--wrap-banner-ratio, 0.42) * 0.6), transparent calc(100vw * var(--wrap-banner-ratio, 0.42)));
+}
+
+/* ---- "Downloads are coming soon" (built by inject.js) ---- */
+
+#__wrap_modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+}
+#__wrap_modal.show {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s ease;
+}
+#__wrap_modal .card {
+  width: 100%;
+  max-width: 340px;
+  box-sizing: border-box;
+  padding: 28px 24px 20px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #282828, #1e1e1e);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  transform: translateY(12px) scale(0.96);
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+#__wrap_modal.show .card {
+  transform: none;
+}
+#__wrap_modal svg {
+  width: 52px;
+  height: 52px;
+  fill: var(--wrap-accent);
+  margin-bottom: 14px;
+}
+#__wrap_modal h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+}
+#__wrap_modal p {
+  margin: 0 0 22px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #b3b3b3;
+}
+#__wrap_modal button {
+  width: 100%;
+  padding: 13px 0;
+  border: 0;
+  border-radius: 24px;
+  background: var(--wrap-accent);
+  color: #000;
+  font: 700 15px system-ui, sans-serif;
+}
+#__wrap_modal button:active {
+  transform: scale(0.98);
+}
