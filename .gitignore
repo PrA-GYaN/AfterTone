@@ -1,0 +1,43 @@
+# Build output and caches
+build/
+.gradle/
+.kotlin/
+.cxx/
+.externalNativeBuild/
+captures/
+local.properties
+
+# Built apps and generated files (dist/ holds the built APK and userscript)
+*.apk
+*.aab
+*.apks
+dist/
+__pycache__/
+*.pyc
+
+# Signing secrets: never publish keys or their passwords
+*.jks
+*.keystore
+*.p12
+keystore.properties
+signing.properties
+
+# Editors and tools
+.idea/
+*.iml
+.vscode/
+.claude/
+*.swp
+*~
+
+# Logs and crash dumps
+*.log
+*.hprof
+
+# Private notes (not part of the published project)
+docs/
+/CLAUDE.md
+
+# OS clutter
+.DS_Store
+Thumbs.db
